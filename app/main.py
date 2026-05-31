@@ -40,3 +40,16 @@ async def upload_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=f"Krasch vid inläsning av CSV filen")
     
 
+@app.get("/data/stats")
+def get_stats():
+    global current_dataset
+
+    if current_dataset is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Finns inget dataset uppladdat"
+        )
+    
+    stats_df = current_dataset.describe()
+    stats_df = stats_df.fillna(None)
+    return stats_df.to_dict()
