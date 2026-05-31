@@ -1,0 +1,17 @@
+[project]
+name = "kk2-oraklet"
+version = "0.1.0"
+description = "KK2 - Oraklet"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0", 
+    "pandas>=2.0.0",
+    "pytest>=7.0.0",
+    "httpx>=0.24.0",             
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
