@@ -12,6 +12,7 @@ dependencies = [
     "pytest>=7.0.0",
     "httpx>=0.24.0",
     "requests>=2.34.2",
+    "python-dotenv>=1.2.2",
 ]
 
 [tool.pytest.ini_options]
