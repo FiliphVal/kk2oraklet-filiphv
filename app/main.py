@@ -3,30 +3,24 @@ import pandas as pd
 import io
 
 app = FastAPI(title="KK2 - Oraklet")
-
 current_dataset = None
 
 
 @app.get("/health")
 def health_check():
-    """Verifierar att API:et är vid liv."""
     return {"status": "ok"}
 
 
 @app.post("/data/upload")
 async def upload_file(file: UploadFile = File(...)):
     global current_dataset
-
-
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="Du måste ladda upp en CSV fil")
     
     try:
         content = await file.read()
         df = pd.read_csv(io.BytesIO(content))
-
         current_dataset = df
-
         dtypes_dict = {col: str(dtype) for col, dtype in df.dtypes.items()}
         return {
             "message": "Uppladdning genomförd",
@@ -35,7 +29,6 @@ async def upload_file(file: UploadFile = File(...)):
             "dtypes": dtypes_dict
         }
 
-
     except:
         raise HTTPException(status_code=400, detail=f"Krasch vid inläsning av CSV filen")
     
@@ -43,13 +36,10 @@ async def upload_file(file: UploadFile = File(...)):
 @app.get("/data/stats")
 def get_stats():
     global current_dataset
-
     if current_dataset is None:
         raise HTTPException(
             status_code=404,
             detail="Finns inget dataset uppladdat"
         )
     
-    stats_df = current_dataset.describe()
-    stats_df = stats_df.fillna(None)
-    return stats_df.to_dict()
+    return current_dataset.describe().fillna(None).to_dict()
