@@ -3,6 +3,7 @@ import pandas as pd
 import io
 import os
 from dotenv import load_dotenv
+from app.chain.pipeline import oracle_chain
 
 from app.schemas import QuestionInput, PromptInput, FinalResponse
 from app.chain.steps import PromptBuilder, LLMRunner, ResponseParser
@@ -62,15 +63,12 @@ def ask_oracle(payload: QuestionInput):
     
     stats_dict = current_dataset.describe(include="all").fillna(None).to_dict()
 
-    builder = PromptBuilder()
-    runner = LLMRunner(api_key=HF_API_KEY)
-    parser = ResponseParser(question=payload.question)
-
-    kedja = builder | runner | parser
+    
+    chain = oracle_chain(question=payload.question)
 
     try:
         input_data = PromptInput(question=payload.question, stats=stats_dict)
-        resultat = kedja.invoke(input_data)
+        resultat = chain.invoke(input_data)
         return resultat
     except Exception as e:
         print(f"!!! DETTA ÄR DET RIKTIGA FELET: {str(e)}")
