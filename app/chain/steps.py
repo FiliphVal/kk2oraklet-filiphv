@@ -14,13 +14,9 @@ class PromptBuilder(Runnable[PromptInput, PromptOutput]):
     
         ## skicka vidare texten i rätt mall
         return PromptOutput(prompt=prompt_text)
-    
-generator = pipeline(
-        "text-generation",
-        model="Qwen/Qwen2.5-0.5B-Instruct",
-        trust_remote_code=True
-    )
 class LLMRunner(Runnable[PromptOutput, LLMOutput]):
+
+    generator: any
 
     def invoke(self, data: PromptOutput) -> LLMOutput:
 
@@ -28,9 +24,9 @@ class LLMRunner(Runnable[PromptOutput, LLMOutput]):
             {"role": "user", "content": data.prompt}
         ]
 
-        result = generator(
+        result = self.generator(
             message,
-            max_new_tokens=50,
+            max_new_tokens=150,
             temperature=0.1,
             do_sample=True
         )
