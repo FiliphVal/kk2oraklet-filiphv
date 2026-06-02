@@ -1,4 +1,5 @@
 import requests
+from typing import Any
 from app.chain.runnable import Runnable
 from app.schemas import PromptInput, PromptOutput, LLMOutput, FinalResponse
 from transformers import pipeline
@@ -16,7 +17,7 @@ class PromptBuilder(Runnable[PromptInput, PromptOutput]):
         return PromptOutput(prompt=prompt_text)
 class LLMRunner(Runnable[PromptOutput, LLMOutput]):
 
-    generator: any
+    generator: Any
 
     def invoke(self, data: PromptOutput) -> LLMOutput:
 
