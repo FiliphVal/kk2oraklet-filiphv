@@ -1,10 +1,18 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
 import io
+import os
+from dotenv import load_dotenv
+
+from app.schemas import QuestionInput, PromptInput, FinalResponse
+from app.chain.steps import PromptBuilder, LLMRunner, ResponseParser
+
+load_dotenv()
 
 app = FastAPI(title="KK2 - Oraklet")
 current_dataset = None
 
+HF_API_KEY = os.getenv("HF_API_KEY")
 
 @app.get("/health")
 def health_check():
@@ -43,3 +51,27 @@ def get_stats():
         )
     
     return current_dataset.describe().fillna(None).to_dict()
+
+
+@app.post("/ai/ask", response_model=FinalResponse)
+def ask_oracle(payload: QuestionInput):
+    global current_dataset
+
+    if current_dataset is None:
+        raise HTTPException(status_code=400, detail="Ladda upp ett dataset först")
+    
+    stats_dict = current_dataset.describe(include="all").fillna(None).to_dict()
+
+    builder = PromptBuilder()
+    runner = LLMRunner(api_key=HF_API_KEY)
+    parser = ResponseParser(question=payload.question)
+
+    kedja = builder | runner | parser
+
+    try:
+        input_data = PromptInput(question=payload.question, stats=stats_dict)
+        resultat = kedja.invoke(input_data)
+        return resultat
+    except Exception as e:
+        print(f"!!! DETTA ÄR DET RIKTIGA FELET: {str(e)}")
+        raise HTTPException(status_code=500, detail="AI kraschade")
