@@ -18,4 +18,4 @@ class LLMOutput(BaseModel):
 class FinalResponse(BaseModel):
     question: str
     answer: str
-    model: str = "HuggingFaceTB/SmolLM2-135M-Instruct"
+    model: str = "Qwen/Qwen2.5-0.5B-Instruct"
