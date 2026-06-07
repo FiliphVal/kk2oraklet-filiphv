@@ -10,10 +10,14 @@ from app.chain.steps import PromptBuilder, LLMRunner, ResponseParser
 
 load_dotenv()
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="KK2 - Oraklet")
 current_dataset = None
 
 HF_API_KEY = os.getenv("HF_API_KEY")
+MAX_FILE_SIZE = 10 * 1024 * 1024 ## spärr på 10mb max 
 
 @app.get("/health")
 def health_check():
@@ -26,11 +30,16 @@ async def upload_file(file: UploadFile = File(...)):
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="Du måste ladda upp en CSV fil")
     
+    if file.size and file.size > MAX_FILE_SIZE:
+        logger.warning(f"Filen {file.filename} var för stor.")
+        raise HTTPException(status_code=400, detail="Filen är för stor. Max 10 MB tillåtet.")
+    
     try:
         content = await file.read()
         df = pd.read_csv(io.BytesIO(content))
         current_dataset = df
         dtypes_dict = {col: str(dtype) for col, dtype in df.dtypes.items()}
+        logger.info("En ny CSV fil laddades upp framgångsrikt.")
         return {
             "message": "Uppladdning genomförd",
             "rows": len(df),
@@ -38,7 +47,8 @@ async def upload_file(file: UploadFile = File(...)):
             "dtypes": dtypes_dict
         }
 
-    except:
+    except Exception as e:
+        logger.error(f"Krasch vid inläsning av CSV filen: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Krasch vid inläsning av CSV filen")
     
 
@@ -69,7 +79,8 @@ def ask_oracle(payload: QuestionInput):
     try:
         input_data = PromptInput(question=payload.question, stats=stats_dict)
         resultat = chain.invoke(input_data)
+        logger.info("AI genererade ett svar utan problem.")
         return resultat
     except Exception as e:
-        print(f"!!! DETTA ÄR DET RIKTIGA FELET: {str(e)}")
+        logger.error(f"AI kraschade: {str(e)}")
         raise HTTPException(status_code=500, detail="AI kraschade")

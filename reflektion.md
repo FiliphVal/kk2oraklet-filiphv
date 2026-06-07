@@ -32,3 +32,5 @@ Största tekniska hindret och dess lösning
  Mitt absolut största problem under arbetet var nätverksanropen i början. Jag försökte först köra modeller online via Hugging Faces API, men jag fick bara krascher och felmeddelanden om rate limits hela tiden. Efter att ha felsökt detta en hel dag utan att hitta någon lösning bestämde jag mig för att strunta i api lösningen helt och hållet och köra modellen lokalt på min egen dator istället via transformers pipeline. Tack vare att jag hade byggt hela flödet som en flexbel runnable kedja blev det här bytet väldigt smidigt, eftersom jag bara behövde uppdatera koden i mitt exekveringssteg. När SmolLLM2 sen inte gav vettiga svar lokalt kunde jag tack vare samma flexibla kod enkelt byta ut den mot den smartare Qwen modellen och knappt behöva ändra om någoti koden.
 
 
+Extra kommentar -
+Längst ner i uppgiften står det att stegen är utbytbara och att jag kan byta ut SmolLLM mot en annan modell utan att röra resten av koden, därav har jag tolkat detta som att det är OK att byta modell från SmolLLM till Qwen.
