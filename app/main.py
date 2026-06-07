@@ -4,7 +4,7 @@ import io
 import os
 from dotenv import load_dotenv
 from app.chain.pipeline import oracle_chain
-
+import logging
 from app.schemas import QuestionInput, PromptInput, FinalResponse
 from app.chain.steps import PromptBuilder, LLMRunner, ResponseParser
 
